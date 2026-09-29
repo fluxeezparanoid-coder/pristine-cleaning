@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: pristine-db
+    environment:
+      POSTGRES_DB: pristine
+      POSTGRES_USER: pristine
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pristine_dev_password}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pristine -d pristine"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    container_name: pristine-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Demo
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: Host=db;Port=5432;Database=pristine;Username=pristine;Password=${POSTGRES_PASSWORD:-pristine_dev_password}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env (at least 32 characters)}
+      Seed__DemoData: "true"
+      Seed__DemoPassword: Demo#Pass2026
+      Swagger__Enabled: "true"
+      # Docker's bridge networks; X-Forwarded-For is only trusted from the nginx container.
+      ReverseProxy__TrustedNetworks__0: 172.16.0.0/12
+    # Not published: the API is only reachable through nginx, so X-Forwarded-For can't be spoofed.
+    expose:
+      - "8080"
+
+  web:
+    build: ./frontend
+    container_name: pristine-web
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:

@@ -1,0 +1,20 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# Node
+node_modules/
+dist/
+
+# Secrets & local
+.env
+*.log
+.DS_Store
+
+# Local demo databases (SQLite)
+*.db
+*.db-shm
+*.db-wal

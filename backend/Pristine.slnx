@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pristine.Api/Pristine.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Pristine.Api.Tests/Pristine.Api.Tests.csproj" />
+  </Folder>
+</Solution>
